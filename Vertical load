@@ -1,1 +1,8 @@
+#Estimate the vertical load of the pile by some method :D 
 
+#-----------------------------------------------
+#The vertical load estimation using SPT value
+#-----------------------------------------------
+
+def Vertical_load():
+  
