@@ -1,0 +1,40 @@
+# %%
+import numpy as np
+import matplotlib.pyplot as plt
+
+# %% this section calculate the p-y curve for sand according to API code
+# see https://www.rocscience.com/help/rspile/pdf_files/theory/RSPile_-_Laterally_Loaded_Pile_Theory.pdf
+# see http://geocalcs.s3.amazonaws.com/LAP/LapManual.pdf
+
+d     = 6 # diameter of pile in meter
+z     = 5 # the depth to consider
+
+phi_  = 38 #internal frictinal angle in degree
+phi   = np.radians(phi_) 
+alpha = phi/2
+beta  = np.radians(45) + phi/2
+k0    = 0.4
+kA    = (1-np.sin(phi))/(1+np.sin(phi))
+kP    = 1/kA
+
+temp1= np.tan(phi)*np.sin(beta)*(1/np.cos(alpha)+1)
+C1   = np.tan(beta)*(kP*np.tan(alpha) + k0*(temp1 - np.tan(alpha)))
+C2   = kP - kA
+C3   = kP**2*(kP + k0*np.tan(phi)) - kA
+gamma= 5 #effective unit weight in kN/m3
+p_us = (C1*z + C2*d)*gamma*z
+p_ud = C3*d*gamma*z
+p_u  = np.min([p_us , p_ud], axis = 0)
+
+API_f = np.array([30.2,	32.2,	33.9,	35.5,	37,	38.2,	39.1,	40.2,	41.2,	41.8,	42.4])
+API_k = np.array([2345.8,6746.3,12683.3,20803.7,29435.7,37807.4,44889.2,54158.1,63554.6,71018.2,77067.8])
+k     = np.interp(phi_, API_f, API_k)
+
+API_f_water = np.array([30.2, 30.5, 32.3, 33.9, 35, 36.7, 37.9, 39, 40.2, 41.3, 42.4])
+API_k_water =np.array([2345.8 , 2607.5, 5333.1 , 9084.5, 12185.8, 17222.8, 21353.6, 26125.5, 31154.9, 36569.4, 43525.1])
+k_w         = np.interp(phi_, API_f_water, API_k_water)
+
+A = 0.9
+y = np.linspace(0,0.05,100)
+p = A*p_u*np.tanh(k*z/(A*p_u)*y)
+p_w= A*p_u*np.tanh(k_w*z/(A*p_u)*y)
